@@ -18,9 +18,14 @@ library
   exposed-modules:     FuseBindings
                      , Logging
                      , CInterop
+
   build-depends:       HFuse
+                     , QuickCheck
                      , base >= 4.7 && < 5
+                     , directory
                      , filepath
+                     , hspec
+                     , process
                      , stm
                      , unix
   default-language:    Haskell2010
@@ -30,9 +35,9 @@ executable FuseSys-exe
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , FuseSys
+  build-depends:       FuseSys
                      , HFuse
+                     , base
   default-language:    Haskell2010
                      
 
@@ -40,8 +45,11 @@ test-suite FuseSys-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  build-depends:       base
-                     , FuseSys
+  build-depends:       FuseSys
+                     , QuickCheck
+                     , base
+                     , hspec
+                     , process
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 

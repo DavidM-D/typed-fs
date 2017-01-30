@@ -35,7 +35,7 @@ fo = FuseOperations {
     , fuseFlush = traceLog "fuseFlush" undefined -- FilePath -> fh -> IO Errno,
     , fuseRelease = traceLog "fuseRelease" $ const $ const $ return () -- FilePath -> fh -> IO (),
     , fuseSynchronizeFile = traceLog "fuseSynchronizeFile" undefined -- FilePath -> SyncType -> IO Errno,
-    , fuseOpenDirectory = const $ return (traceLog ("fuseOpenDirectory") $ C.eOK) -- FilePath -> IO Errno,
+    , fuseOpenDirectory = traceLog ("fuseOpenDirectory") openDir -- FilePath -> IO Errno,
     , fuseReadDirectory = traceLog "fuseReadDirectory" undefined -- FilePath -> IO (Either Errno [(FilePath, FileStat)]),
     , fuseReleaseDirectory = traceLog "fuseReleaseDirectory" undefined -- FilePath -> IO Errno,
     , fuseSynchronizeDirectory = traceLog "fuseSynchronizeDirectory" undefined -- FilePath -> SyncType -> IO Errno,
@@ -46,6 +46,10 @@ fo = FuseOperations {
 backingPath :: FilePath
 backingPath = "/home/david/backing"
 
+openDir :: FilePath -> IO C.Errno
+openDir = do
+   exists <- doesDirectoryExist
+   
 
 getFileStat :: FilePath -> IO (Either C.Errno FileStat)
 getFileStat fp = do
@@ -53,3 +57,6 @@ getFileStat fp = do
   stat <- return $ Right $ fileStat status
   return $ traceLog "fileStat" $ stat
   where path = backingPath ++ fp
+
+isReadable :: FilePath -> IO Bool
+isReadable = getPermissions >>= isReadable
