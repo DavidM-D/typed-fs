@@ -1,4 +1,4 @@
-
+{-# LANGUAGE StandaloneDeriving #-}
 module FuseBindings (
   fo
           ) where
@@ -6,11 +6,16 @@ import System.Fuse
 --import Storage
 import Foreign.C.Error as C
 import Logging (traceLog)
+import System.Posix.Files
+import System.Posix.Directory
+import qualified System.FilePath.Posix as Path
+import CInterop
 
 fo :: FuseOperations fs
 fo = FuseOperations {
-      fuseGetFileStat = const (return undefined) -- FilePath -> IO (Either Errno FileStat),
-    , fuseReadSymbolicLink = traceLog "fuseReadSymbolicLink" undefined -- FilePath -> IO (Either Errno FilePath),
+      fuseGetFileStat = traceLog "fuseGetFileStat"
+        $ getFileStat -- FilePath -> IO (Either Errno FileStat),
+    , fuseReadSymbolicLink = traceLog "fuseReadSymbolicLink" $ fmap Right . readSymbolicLink -- FilePath -> IO (Either Errno FilePath),
     , fuseAccess = traceLog "fuseAccess" $ const $ const $ return C.eOK
     , fuseCreateDevice = traceLog "fuseCreateDevice" undefined -- FilePath -> EntryType -> FileMode -> DeviceID -> IO Errno,
     , fuseCreateDirectory = traceLog "fuseCreateDirectory" undefined -- FilePath -> FileMode -> IO
@@ -34,6 +39,17 @@ fo = FuseOperations {
     , fuseReadDirectory = traceLog "fuseReadDirectory" undefined -- FilePath -> IO (Either Errno [(FilePath, FileStat)]),
     , fuseReleaseDirectory = traceLog "fuseReleaseDirectory" undefined -- FilePath -> IO Errno,
     , fuseSynchronizeDirectory = traceLog "fuseSynchronizeDirectory" undefined -- FilePath -> SyncType -> IO Errno,
-    , fuseInit = traceLog "fuseInit" undefined -- IO (),
-    , fuseDestroy = traceLog "fuseDestroy" undefined -- IO ()
+    , fuseInit = traceLog "fuseInit" $ return () -- IO (),
+    , fuseDestroy = traceLog "fuseDestroy" $ return () -- IO ()
     }
+
+backingPath :: FilePath
+backingPath = "/home/david/backing"
+
+
+getFileStat :: FilePath -> IO (Either C.Errno FileStat)
+getFileStat fp = do
+  status <- getFileStatus $ traceLog path path
+  stat <- return $ Right $ fileStat status
+  return $ traceLog "fileStat" $ stat
+  where path = backingPath ++ fp
