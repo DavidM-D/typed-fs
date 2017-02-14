@@ -38,7 +38,7 @@ mountPath :: String
 mountPath = "/home/david/mounted"
 
 backingPath :: String
-backingPath = "~/backing"
+backingPath = "/home/david/backing"
 
 setupEnv :: IO [ExitCode]
 setupEnv =
